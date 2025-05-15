@@ -30,46 +30,46 @@ all_posts: List[Dict] = [
     "published": True,
     "rating": 2.3
   },
-  {
-    "id": 5,
-    "title": "Determine put outside explain democratic.",
-    "content": "Share up job fight hope both form. Car culture wrong certainly.",
-    "published": False,
-    "rating": 3.3
-  },
-  {
-    "id": 6,
-    "title": "You theory talk action whose wonder move.",
-    "content": "Record him put away matter commercial father. Article owner majority old blue mission.",
-    "published": False,
-    "rating": 1.4
-  },
-  {
-    "id": 7,
-    "title": "Although stuff baby run central marriage.",
-    "content": "Few along ask best anyone rate. Available purpose improve listen available resource interesting.",
-    "published": False,
-    "rating": 3.0
-  },
-  {
-    "id": 8,
-    "title": "They beyond south.",
-    "content": "Quite center he leader free around long.",
-    "published": False,
-    "rating": 2.6
-  },
-  {
-    "id": 9,
-    "title": "Southern answer final.",
-    "content": "Pm natural exactly partner capital church too. Arm only detail window since relationship. Recent concern camera dog spring size.",
-    "published": True,
-    "rating": 3.7
-  },
-  {
-    "id": 10,
-    "title": "In forget cost focus.",
-    "content": "Make learn interview pay True arm more debate. Identify rock late pressure position smile. Similar line ok require try computer that.",
-    "published": True,
-    "rating": 3.8
-  }
+#   {
+#     "id": 5,
+#     "title": "Determine put outside explain democratic.",
+#     "content": "Share up job fight hope both form. Car culture wrong certainly.",
+#     "published": False,
+#     "rating": 3.3
+#   },
+#   {
+#     "id": 6,
+#     "title": "You theory talk action whose wonder move.",
+#     "content": "Record him put away matter commercial father. Article owner majority old blue mission.",
+#     "published": False,
+#     "rating": 1.4
+#   },
+#   {
+#     "id": 7,
+#     "title": "Although stuff baby run central marriage.",
+#     "content": "Few along ask best anyone rate. Available purpose improve listen available resource interesting.",
+#     "published": False,
+#     "rating": 3.0
+#   },
+#   {
+#     "id": 8,
+#     "title": "They beyond south.",
+#     "content": "Quite center he leader free around long.",
+#     "published": False,
+#     "rating": 2.6
+#   },
+#   {
+#     "id": 9,
+#     "title": "Southern answer final.",
+#     "content": "Pm natural exactly partner capital church too. Arm only detail window since relationship. Recent concern camera dog spring size.",
+#     "published": True,
+#     "rating": 3.7
+#   },
+#   {
+#     "id": 10,
+#     "title": "In forget cost focus.",
+#     "content": "Make learn interview pay True arm more debate. Identify rock late pressure position smile. Similar line ok require try computer that.",
+#     "published": True,
+#     "rating": 3.8
+#   }
 ]
