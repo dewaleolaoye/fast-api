@@ -3,7 +3,7 @@ from typing import Optional, Union
 from fastapi import FastAPI
 from pydantic import BaseModel
 from data import all_posts
-from error import invalid_post, raise_not_found
+from error import raise_not_found
 from utility import find_post
 
 app = FastAPI()
@@ -43,12 +43,12 @@ def create_post(payload: Post):
 
 
 @app.get('/posts/{id}')
-def get_post(id: str): 
-      try:
-        post = find_post(int(id))
+def get_post(id: int): 
+      post = find_post(id)
+      # try:
         
-      except ValueError:
-        invalid_post(id)
+      # except ValueError:
+      #   invalid_post(id)
 
       if post is None:
           raise_not_found(id)
