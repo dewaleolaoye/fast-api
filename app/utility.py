@@ -1,4 +1,4 @@
-from data import all_posts
+from .data import all_posts
 
 def find_post(post_id: int):
     find_post = (post for post in all_posts if post["id"] == post_id)

@@ -2,9 +2,9 @@ from random import randrange
 from typing import Optional, Union
 from fastapi import FastAPI, status
 from pydantic import BaseModel
-from data import all_posts
-from error import raise_not_found
-from utility import find_post, find_post_index
+from .data import all_posts
+from .error import raise_not_found
+from .utility import find_post, find_post_index
 
 app = FastAPI()
 

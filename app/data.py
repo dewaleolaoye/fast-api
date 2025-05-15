@@ -1,6 +1,5 @@
 from typing import Dict, List
 
-
 all_posts: List[Dict] = [
   {
     "id": 1,
