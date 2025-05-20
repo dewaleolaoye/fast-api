@@ -1,10 +1,14 @@
-from random import randrange
-from typing import Optional, Union
+# from random import randrange
+import time
+from typing import Union
 from fastapi import FastAPI, status
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
 from pydantic import BaseModel
-from .data import all_posts
+# from .data import all_posts
 from .error import raise_not_found
-from .utility import find_post, find_post_index
+# from .utility import find_post, find_post_index
 
 app = FastAPI()
 
@@ -12,7 +16,26 @@ class Post(BaseModel):
     title: str
     content: str
     published: Union[bool, None] = True
-    rating: Optional[float] = None
+    # rating: Optional[float] = None
+
+while True:
+
+    try:
+        conn = psycopg2.connect(
+            host="localhost", 
+            database="fastapi", 
+            user="postgres", 
+            password="1234", 
+            cursor_factory=RealDictCursor
+            )
+        
+        cur = conn.cursor()
+        print("Database connected successfull")
+
+        break
+    except Exception as error:
+        time.sleep(2)
+        print(error, 'CONNECTION FAILED') 
 
 
 @app.get("/")
@@ -22,19 +45,24 @@ def read_root():
 
 @app.get("/posts")
 def get_posts():
+    cur.execute("""SELECT * FROM posts""")
+    posts = cur.fetchall()
+    
     return {
-        "data": all_posts,
+        "data": posts,
         "msg": "successfully fetched data"
     }
 
 
 @app.post('/createposts', status_code=status.HTTP_201_CREATED)
 def create_post(payload: Post):
-    new_post = payload.model_dump()
+    cur.execute(""" INSERT INTO posts 
+                ( title, content, is_published ) VALUES (%s, %s, %s) RETURNING *""", 
+                (payload.title, payload.content, payload.published))
 
-    new_post['id'] = randrange(0, 1000000)
+    new_post = cur.fetchone()
 
-    all_posts.append(new_post)
+    conn.commit()
     return {
         "data": new_post,
         "msg": "successfully create new post"
@@ -43,12 +71,8 @@ def create_post(payload: Post):
 
 @app.get('/posts/{id}')
 def get_post(id: int): 
-      # print(response)
-      post = find_post(id)
-      # try:
-        
-      # except ValueError:
-      #   invalid_post(id)
+      cur.execute("""SELECT * FROM posts WHERE id = %s """, (str(id),))
+      post = cur.fetchone()
 
       if post is None:
           raise_not_found(id)
@@ -59,31 +83,32 @@ def get_post(id: int):
 
 @app.delete('/posts/{id}', status_code=status.HTTP_200_OK)
 def delete_post(id: int):
-    index = find_post_index(id)
-    
-    if index is None:
-        raise_not_found(id)
+    cur.execute("""DELETE FROM posts WHERE id = %s RETURNING *""", (str(id),))
+    delete_post = cur.fetchone()
+    conn.commit()
 
-    all_posts.pop(index)
+    if delete_post is None:
+        raise_not_found(id)
 
     return {
         "msg": f"Post {id} deleted successfully",
+        "data": delete_post
     }
 
 @app.put('/posts/{id}')
 def update_post(id:int, updated_post:Post):
-    print(updated_post, 'UPDATED POST')
-    post_index = find_post_index(id)
+    
+    cur.execute(""" UPDATE posts SET 
+                title = %s, content = %s, is_published = %s WHERE id = %s RETURNING *""", 
+                (updated_post.title, updated_post.content, updated_post.published, str(id)))
+    
+    post = cur.fetchone()
+    conn.commit()
 
-    if post_index is None:
+    if post is None:
         raise_not_found(id)
-
-    post_dict = updated_post.model_dump()
-    post_dict['id'] = id
-
-    all_posts[post_index] = post_dict
 
     return {
         "msg": "Post updated successfully ",
-        "data": post_dict
+        "data": post
     }
