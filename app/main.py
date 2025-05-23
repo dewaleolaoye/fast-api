@@ -8,11 +8,10 @@ from psycopg2.extras import RealDictCursor
 
 from pydantic import BaseModel
 
-from .database import SessionLocal, engine
+from .database import engine, get_db
 from .error import raise_not_found
 
 from . import models
-# from . import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -20,14 +19,6 @@ def create_db_and_tables():
     models.metadata.create_all(engine)
 
 
-def get_db():
-    db = SessionLocal
-
-    try:
-        yield db
-    
-    finally:
-        db.close_all()
 
 app = FastAPI()
 
