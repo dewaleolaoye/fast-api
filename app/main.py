@@ -1,24 +1,12 @@
-from typing import Union
 from sqlalchemy.orm import Session
 from fastapi import Depends, FastAPI, status
 
-from pydantic import BaseModel
-
-from app.error import raise_not_found
 from .database import engine, get_db
-from . import models
+from . import models, schema, error
 
 models.Base.metadata.create_all(bind=engine)
 
-def create_db_and_tables():
-    models.metadata.create_all(engine)
-
 app = FastAPI()
-
-class Post(BaseModel):
-    title: str
-    content: str
-    published: Union[bool, None] = True
 
 @app.get("/")
 def read_root():
@@ -36,7 +24,7 @@ def get_posts(db: Session = Depends(get_db)):
 
 
 @app.post('/createposts', status_code=status.HTTP_201_CREATED)
-def create_post(payload: Post, db: Session = Depends(get_db)): 
+def create_post(payload: schema.PostCreate, db: Session = Depends(get_db)): 
     new_post = models.Post(**payload.model_dump())
     db.add(new_post)
     db.commit()
@@ -53,18 +41,19 @@ def get_post(id: int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == id).first()
 
     if post is None:
-        raise_not_found(id)
+        error.raise_not_found(id)
 
     return {
         "data": post
     } 
+
 
 @app.delete('/posts/{id}', status_code=status.HTTP_200_OK)
 def delete_post(id: int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == id)
 
     if post.first() is None:
-        raise_not_found(id)
+        error.raise_not_found(id)
 
     post.delete(synchronize_session=False)
     db.commit()
@@ -73,13 +62,14 @@ def delete_post(id: int, db: Session = Depends(get_db)):
         "msg": f"Post {id} deleted successfully",
     }
 
+
 @app.put('/posts/{id}')
-def update_post(id:int, payload:Post, db: Session = Depends(get_db)):
+def update_post(id:int, payload:schema.PostCreate, db: Session = Depends(get_db)):
     post_query = db.query(models.Post).filter(models.Post.id == id)
 
     post = post_query.first()
     if post is None:
-        raise_not_found(id)
+        error.raise_not_found(id)
 
     post_query.update(payload.model_dump(), synchronize_session=False)
     db.commit()
