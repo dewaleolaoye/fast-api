@@ -1,14 +1,33 @@
 # from random import randrange
 import time
 from typing import Union
-from fastapi import FastAPI, status
+from sqlalchemy.orm import Session
+from fastapi import Depends, FastAPI, status
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
 from pydantic import BaseModel
-# from .data import all_posts
+
+from .database import SessionLocal, engine
 from .error import raise_not_found
-# from .utility import find_post, find_post_index
+
+from . import models
+# from . import SessionLocal, engine
+
+models.Base.metadata.create_all(bind=engine)
+
+def create_db_and_tables():
+    models.metadata.create_all(engine)
+
+
+def get_db():
+    db = SessionLocal
+
+    try:
+        yield db
+    
+    finally:
+        db.close_all()
 
 app = FastAPI()
 
@@ -16,7 +35,6 @@ class Post(BaseModel):
     title: str
     content: str
     published: Union[bool, None] = True
-    # rating: Optional[float] = None
 
 while True:
 
@@ -112,3 +130,8 @@ def update_post(id:int, updated_post:Post):
         "msg": "Post updated successfully ",
         "data": post
     }
+
+
+@app.post('/sql')
+def test_post(db: Session = Depends(get_db)):
+    return {"status": "success"}
