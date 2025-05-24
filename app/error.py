@@ -2,7 +2,7 @@ from fastapi import HTTPException, status
 
 def raise_not_found (id: int):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={
-        "msg":f"post id {id} not found",
+        "msg":f"{id} not found",
         "status": status.HTTP_404_NOT_FOUND
     })
 
