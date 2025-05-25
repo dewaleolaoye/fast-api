@@ -4,6 +4,8 @@ from app import error, models, schema
 from app.database import get_db
 from sqlalchemy.orm import Session
 
+from app.utility import find_user_by_id
+
 router = APIRouter(
     prefix="/users",
     tags=["Users"]
@@ -27,10 +29,12 @@ def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
 @router.get('/{id}', status_code=status.HTTP_200_OK, response_model=schema.UserResponse)
 def get_user(id: int, db: Session = Depends(get_db)):
     
-    user = db.query(models.User).filter(models.User.id == id).first()
+    user = find_user_by_id(id=id, db=db)
 
     if user is None:
-        error.raise_not_found(id)
+        error.raise_not_found(id, detail=f"user with {id} not found")
+
+        print("hello")
 
     return user
 

@@ -1,4 +1,10 @@
+from fastapi import Depends
+from sqlalchemy.orm import Session
+
+from app import models
+from app.database import get_db
 from .data import all_posts
+
 
 def find_post(post_id: int):
     find_post = (post for post in all_posts if post["id"] == post_id)
@@ -14,3 +20,18 @@ def find_post_index(id: int):
     for i, p in enumerate(all_posts):
         if p['id'] == id:
             return i
+        
+
+def find_user_by_email(email: str, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email == email)
+
+    if user is None:
+        return None
+    
+    return user
+
+def find_user_by_id(id: int, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == id).first()
+
+    return user
+
