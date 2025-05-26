@@ -12,7 +12,7 @@ router = APIRouter(
     tags=["Authentication"]
 )
 
-@router.post('/login', status_code=status.HTTP_200_OK)
+@router.post('/login', status_code=status.HTTP_200_OK, response_model=schema.Token)
 def login(payload:OAuth2PasswordRequestForm = Depends(), db:Session=Depends(get_db)):
 # def login(payload:schema.LoginAuth, db:Session=Depends(get_db)):
     user = find_user_by_username(payload.username, db)
@@ -34,7 +34,8 @@ def login(payload:OAuth2PasswordRequestForm = Depends(), db:Session=Depends(get_
             "id": user.id,
             "access_token": token,
             "username": user.username,
-            "email": user.email
+            "email": user.email,
+            "created_at": user.created_at
         },
         "status": status.HTTP_200_OK
     }

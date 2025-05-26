@@ -5,9 +5,12 @@ from app import error, models, schema
 from app.database import get_db
 from sqlalchemy.orm import Session
 
+from app.oauth2 import get_current_user
+
 router = APIRouter(
     prefix="/posts",
-    tags=["Posts"]
+    tags=["Posts"],
+    dependencies=[Depends(get_current_user)]
 )
 
 @router.get("/", response_model=List[schema.PostResponse])
@@ -19,6 +22,7 @@ def get_posts(db: Session = Depends(get_db)):
 
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=schema.PostResponse)
 def create_post(payload: schema.PostCreate, db: Session = Depends(get_db)): 
+    # print(user_id, 'USER ID HERE')
     new_post = models.Post(**payload.model_dump())
     db.add(new_post)
     db.commit()

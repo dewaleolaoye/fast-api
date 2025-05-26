@@ -33,8 +33,8 @@ class LoginAuth(BaseModel):
     password: str
 
 class Token(BaseModel):
-    access_token: str
-    token_type: str
+    data: UserResponse
+    status: int
 
 class TokenData(BaseModel):
     id: Union[str, None]
