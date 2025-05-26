@@ -37,7 +37,8 @@ def login(payload:OAuth2PasswordRequestForm = Depends(), db:Session=Depends(get_
             "email": user.email,
             "created_at": user.created_at
         },
-        "status": status.HTTP_200_OK
+        "status": status.HTTP_200_OK,
+        "token_type": "Bearer"
     }
 
 

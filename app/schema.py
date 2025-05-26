@@ -7,14 +7,13 @@ class PostBase(BaseModel):
     content: str
     published: bool = True
 
-
 class PostCreate(PostBase):
     pass
-
 
 class PostResponse(PostBase):
     id: int
     created_at: datetime
+    user_id: int
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -35,6 +34,7 @@ class LoginAuth(BaseModel):
 class Token(BaseModel):
     data: UserResponse
     status: int
+    token_type: str
 
 class TokenData(BaseModel):
     id: Union[str, None]

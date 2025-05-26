@@ -2,12 +2,15 @@ from datetime import datetime, timedelta, timezone
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 from fastapi import Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
 from app import schema
+from app.database import get_db
+from app.utility import find_user_by_id
 
 SECRET_KEY = "3cf9b4922836e99a69d04811c47465dada4c4f1077413f7415e5aa437a0a96cd"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
@@ -36,11 +39,15 @@ def verify_access_token(token: str, credentials_exception):
     
     return token_data
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    return verify_access_token(token, credentials_exception)
+    token_data = verify_access_token(token, credentials_exception)
+
+    user = find_user_by_id(token_data.id, db)
+
+    return user

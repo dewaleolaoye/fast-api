@@ -14,16 +14,18 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=List[schema.PostResponse])
-def get_posts(db: Session = Depends(get_db)):
+def get_posts(db: Session = Depends(get_db), user: schema.UserResponse = Depends(get_current_user)):
+    print(user.email, 'HEY USER')
     posts = db.query(models.Post).all()
         
     return posts
 
 
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=schema.PostResponse)
-def create_post(payload: schema.PostCreate, db: Session = Depends(get_db)): 
-    # print(user_id, 'USER ID HERE')
-    new_post = models.Post(**payload.model_dump())
+def create_post(payload: schema.PostCreate, db: Session = Depends(get_db), user: schema.UserResponse = Depends(get_current_user)): 
+    # update_payload = payload.model_copy(update={"user_id": user.id})
+    
+    new_post = models.Post(user_id=user.id, **payload.model_dump())
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
