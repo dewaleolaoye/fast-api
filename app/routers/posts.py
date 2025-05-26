@@ -1,6 +1,6 @@
 
 from typing import List
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from app import error, models, schema
 from app.database import get_db
 from sqlalchemy.orm import Session
@@ -15,7 +15,6 @@ router = APIRouter(
 
 @router.get("/", response_model=List[schema.PostResponse])
 def get_posts(db: Session = Depends(get_db), user: schema.UserResponse = Depends(get_current_user)):
-    print(user.email, 'HEY USER')
     posts = db.query(models.Post).all()
         
     return posts
@@ -44,13 +43,19 @@ def get_post(id: int, db: Session = Depends(get_db)):
 
 
 @router.delete('/{id}', status_code=status.HTTP_200_OK)
-def delete_post(id: int, db: Session = Depends(get_db)):
-    post = db.query(models.Post).filter(models.Post.id == id)
+def delete_post(id: int, db: Session = Depends(get_db), user: schema.UserResponse = Depends(get_current_user)):
+    post_query = db.query(models.Post).filter(models.Post.id == id)
 
-    if post.first() is None:
+    post = post_query.first()
+
+    if post is None:
         return error.raise_not_found(id)
+    
+    if (user.id != post.user_id):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You can not perform this operation")
+        
 
-    post.delete(synchronize_session=False)
+    post_query.delete(synchronize_session=False)
     db.commit()
 
     return {
@@ -59,12 +64,16 @@ def delete_post(id: int, db: Session = Depends(get_db)):
 
 
 @router.put('/{id}', response_model=schema.PostResponse)
-def update_post(id:int, payload:schema.PostCreate, db: Session = Depends(get_db)):
+def update_post(id:int, payload:schema.PostCreate, db: Session = Depends(get_db), user: schema.UserResponse = Depends(get_current_user)):
+
     post_query = db.query(models.Post).filter(models.Post.id == id)
 
     post = post_query.first()
     if post is None:
         return error.raise_not_found(id)
+    
+    if post.user_id != user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You can not perform this operation") 
 
     post_query.update(payload.model_dump(), synchronize_session=False)
     db.commit()
