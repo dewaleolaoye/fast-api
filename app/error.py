@@ -5,16 +5,20 @@ from fastapi.responses import JSONResponse
 def raise_not_found (id: Optional[int] = None, detail: Optional[str] = None):
     msg = detail if detail else f"{id} not found"
 
-    # raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={
-    #     "msg": msg,
-    #     "status": status.HTTP_404_NOT_FOUND
-    # })
-
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
         content={
             "msg": msg,
             "status": status.HTTP_404_NOT_FOUND
+        }
+    )
+
+def forbidden (msg: str):
+    return JSONResponse(
+        status_code=status.HTTP_403_FORBIDDEN,
+        content={
+            "msg": msg,
+            "status": status.HTTP_403_FORBIDDEN
         }
     )
 

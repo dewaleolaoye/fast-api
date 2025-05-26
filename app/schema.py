@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Union
 from pydantic import BaseModel, EmailStr
 
 class PostBase(BaseModel):
@@ -25,7 +26,15 @@ class UserResponse(BaseModel):
     email: str
     username: str
     created_at: datetime
+    access_token: Union[str, None]
 
 class LoginAuth(BaseModel):
     email: EmailStr
     password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    id: Union[str, None]

@@ -32,7 +32,7 @@ def get_post(id: int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == id).first()
 
     if post is None:
-        error.raise_not_found(id)
+       return error.raise_not_found(id)
 
     return post
 
@@ -42,7 +42,7 @@ def delete_post(id: int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == id)
 
     if post.first() is None:
-        error.raise_not_found(id)
+        return error.raise_not_found(id)
 
     post.delete(synchronize_session=False)
     db.commit()
@@ -58,7 +58,7 @@ def update_post(id:int, payload:schema.PostCreate, db: Session = Depends(get_db)
 
     post = post_query.first()
     if post is None:
-        error.raise_not_found(id)
+        return error.raise_not_found(id)
 
     post_query.update(payload.model_dump(), synchronize_session=False)
     db.commit()

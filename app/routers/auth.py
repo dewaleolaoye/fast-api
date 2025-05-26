@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, status
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from app import error
+from app import error, models, schema
 from app.database import get_db
 from app.oauth2 import create_access_token
-from app.utility import find_user_by_username, verify_password
+from app.utility import find_user_by_email, find_user_by_username, verify_password
 
 router = APIRouter(
     prefix="/auth",
@@ -17,10 +18,10 @@ def login(payload:OAuth2PasswordRequestForm = Depends(), db:Session=Depends(get_
     user = find_user_by_username(payload.username, db)
 
     if user is None:
-        return error.raise_not_found(id=None, detail="Invalid credentials")
+        return error.forbidden("Invalid credentials")
 
     if not verify_password(payload.password, user.password):
-        return error.raise_not_found(id=None, detail="Invalid credentials")
+        return error.forbidden("Invalid credentials")
  
 
     token = create_access_token(data={
@@ -37,3 +38,44 @@ def login(payload:OAuth2PasswordRequestForm = Depends(), db:Session=Depends(get_
         },
         "status": status.HTTP_200_OK
     }
+
+
+
+@router.post('/signup', status_code=status.HTTP_201_CREATED, response_model=schema.UserResponse)
+def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
+
+    user_exist = find_user_by_username(user.username, db) or find_user_by_email(user.email, db)
+
+    print(user_exist, 'IT EXIST')
+    if user_exist is not None:
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content={
+                "msg": "User already exist",
+                "status": status.HTTP_409_CONFLICT
+            }
+        )
+
+    hashed_password = hash(user.password)
+    
+    user.password = hashed_password
+    new_user = models.User(**user.model_dump())
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    token = create_access_token(data={
+        "id": new_user.id,
+        "username": new_user.username
+    })
+
+    user_response = {
+        "id": new_user.id,
+        "email": new_user.email,
+        "username": new_user.username,
+        "created_at": new_user.created_at,
+        "access_token": token,
+    }
+
+    return user_response
