@@ -1,4 +1,3 @@
-
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from app import error, models, schema
@@ -14,8 +13,14 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=List[schema.PostResponse])
-def get_posts(db: Session = Depends(get_db), user: schema.UserResponse = Depends(get_current_user)):
+def get_posts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
+        
+    return posts
+
+@router.get("/user", response_model=List[schema.PostResponse])
+def get_posts_by_user(db: Session = Depends(get_db), user: schema.UserResponse = Depends(get_current_user)):
+    posts = db.query(models.Post).filter(models.Post.user_id == user.id).all()
         
     return posts
 
