@@ -1,5 +1,8 @@
 from fastapi import Depends
 from sqlalchemy.orm import Session
+from passlib.context import CryptContext
+# from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+# from jwt.exceptions import InvalidTokenError
 
 from app import models
 from app.database import get_db
@@ -23,10 +26,7 @@ def find_post_index(id: int):
         
 
 def find_user_by_email(email: str, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.email == email)
-
-    if user is None:
-        return None
+    user = db.query(models.User).filter(models.User.email == email).first()
     
     return user
 
@@ -34,4 +34,18 @@ def find_user_by_id(id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == id).first()
 
     return user
+
+def find_user_by_username(username: str, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.username == username).first()
+
+    return user
+
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def hash(password: str):
+    return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str):
+    return pwd_context.verify(plain_password, hashed_password)
 

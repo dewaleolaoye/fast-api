@@ -4,7 +4,7 @@ from app import error, models, schema
 from app.database import get_db
 from sqlalchemy.orm import Session
 
-from app.utility import find_user_by_id
+from app.utility import find_user_by_id, hash
 
 router = APIRouter(
     prefix="/users",
