@@ -21,4 +21,4 @@ def get_settings():
 @app.get("/")
 def read_root():
     get_settings()
-    return {"Hello": "World"}
+    return {"message": "Hello World"}

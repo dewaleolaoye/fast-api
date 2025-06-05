@@ -26,7 +26,6 @@ def login(payload:OAuth2PasswordRequestForm = Depends(), db:Session=Depends(get_
 
     if not verify_password(payload.password, user.password):
         return error.forbidden("Invalid credentials")
- 
 
     token = create_access_token(data={
         "id": user.id,
