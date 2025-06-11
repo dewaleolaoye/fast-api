@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Union
+from typing import Literal, Union
 from pydantic import BaseModel, EmailStr
 
 class UserResponse(BaseModel):
@@ -14,6 +14,9 @@ class PublicUserResponse(BaseModel):
     email: str
     username: str
 
+    class Config:
+        from_attributes = True
+
 class PostBase(BaseModel):
     title: str
     content: str
@@ -21,6 +24,7 @@ class PostBase(BaseModel):
 
 class PostCreate(PostBase):
     pass
+
 
 class PostResponse(PostBase):
     id: int
@@ -45,3 +49,15 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     id: Union[str, None]
+
+class VoteModel(BaseModel):
+    post_id: int
+    dir: Literal[0, 1]
+
+
+class PostWithVotes(BaseModel):
+    Post: PostResponse
+    votes: int
+
+    class Config:
+        from_attributes = True

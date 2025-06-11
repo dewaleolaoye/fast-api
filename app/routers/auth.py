@@ -18,9 +18,6 @@ def login(payload:OAuth2PasswordRequestForm = Depends(), db:Session=Depends(get_
 # def login(payload:schema.LoginAuth, db:Session=Depends(get_db)):
     user = find_user_by_username(payload.username, db)
 
-    # name = Settings()
-    # print(name, 'THE NAME')
-
     if user is None:
         return error.forbidden("Invalid credentials")
 
@@ -45,13 +42,11 @@ def login(payload:OAuth2PasswordRequestForm = Depends(), db:Session=Depends(get_
     }
 
 
-
 @router.post('/signup', status_code=status.HTTP_201_CREATED, response_model=schema.UserResponse)
 def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
 
     user_exist = find_user_by_username(user.username, db) or find_user_by_email(user.email, db)
 
-    print(user_exist, 'IT EXIST')
     if user_exist is not None:
         return JSONResponse(
             status_code=status.HTTP_409_CONFLICT,
