@@ -6,14 +6,14 @@ from app import error, models, schema
 # from app.config import Settings
 from app.database import get_db
 from app.oauth2 import create_access_token
-from app.utility import find_user_by_email, find_user_by_username, verify_password
+from app.utility import find_user_by_email, find_user_by_username, hash_password, verify_password
 
 router = APIRouter(
     prefix="/auth",
     tags=["Authentication"]
 )
 
-@router.post('/login', status_code=status.HTTP_200_OK, response_model=schema.Token)
+@router.post('/login', status_code=status.HTTP_200_OK)
 def login(payload:OAuth2PasswordRequestForm = Depends(), db:Session=Depends(get_db)):
 # def login(payload:schema.LoginAuth, db:Session=Depends(get_db)):
     user = find_user_by_username(payload.username, db)
@@ -56,7 +56,7 @@ def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
             }
         )
 
-    hashed_password = hash(user.password)
+    hashed_password = hash_password(user.password)
     
     user.password = hashed_password
     new_user = models.User(**user.model_dump())

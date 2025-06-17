@@ -4,7 +4,7 @@ from app import error, models, schema
 from app.database import get_db
 from sqlalchemy.orm import Session
 
-from app.utility import find_user_by_id, hash
+from app.utility import find_user_by_id, hash_password
 
 router = APIRouter(
     prefix="/users",
@@ -14,7 +14,7 @@ router = APIRouter(
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=schema.UserResponse)
 def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
 
-    hashed_password = hash(user.password)
+    hashed_password = hash_password(user.password)
     
     user.password = hashed_password
     new_user = models.User(**user.model_dump())

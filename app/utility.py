@@ -1,8 +1,6 @@
 from fastapi import Depends
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
-# from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-# from jwt.exceptions import InvalidTokenError
+import bcrypt
 
 from app import models
 from app.database import get_db
@@ -40,14 +38,18 @@ def find_user_by_username(username: str, db: Session = Depends(get_db)):
 
     return user
 
+def hash_password(password: str):
+    pwd_bytes = password.encode('utf-8')
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password=pwd_bytes, salt=salt)
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def hash(password: str):
-    return pwd_context.hash(password)
+    return hashed.decode('utf-8')
 
 def verify_password(plain_password: str, hashed_password: str):
-    return pwd_context.verify(plain_password, hashed_password)
+    pwd_bytes = plain_password.encode('utf-8')
+    hashed_bytes = hashed_password.encode('utf-8')
+
+    return bcrypt.checkpw(password=pwd_bytes, hashed_password=hashed_bytes)
 
 def get_post(id: int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == id).first()
