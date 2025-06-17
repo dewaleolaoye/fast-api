@@ -20,9 +20,26 @@ def get_posts(db: Session = Depends(get_db), limit:int= 10, skip: int = 0, searc
     posts = db.query(models.Post, func.count(models.Vote.post_id).label("votes"))\
     .join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True)\
     .group_by(models.Post.id)\
+    .filter(models.Post.title.contains(search))\
+    .limit(limit)\
+    .offset(skip)\
     .all()
 
     return posts
+
+@router.get('/{id}', response_model=schema.PostWithVotes)
+def get_post(id: int, db: Session = Depends(get_db)): 
+    # post = db.query(models.Post).filter(models.Post.id == id).first()
+
+    post = db.query(models.Post, func.count(models.Vote.post_id).label("votes"))\
+    .join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True)\
+    .group_by(models.Post.id)\
+    .filter(models.Post.id == id).first()
+
+    if post is None:
+       return error.raise_not_found(id)
+
+    return post
 
 
 @router.get("/user", response_model=List[schema.PostResponse])
@@ -43,16 +60,6 @@ def create_post(payload: schema.PostCreate, db: Session = Depends(get_db), user:
 
     return new_post
     
-
-@router.get('/{id}', response_model=schema.PostResponse)
-def get_post(id: int, db: Session = Depends(get_db)): 
-    post = db.query(models.Post).filter(models.Post.id == id).first()
-
-    if post is None:
-       return error.raise_not_found(id)
-
-    return post
-
 
 @router.delete('/{id}', status_code=status.HTTP_200_OK)
 def delete_post(id: int, db: Session = Depends(get_db), user: schema.UserResponse = Depends(get_current_user)):
